@@ -112,10 +112,10 @@ class WindowClass(Ui_MainWindow) :
 
     def clickTable(self):
         print("click table view")
-        index = self.tableView.currentIndex()
-        newIndex = self.tableView.model().index(index.row(), 1)
-        print("newIndex", newIndex)
-        print("index", self.tableView.model().data(newIndex))
+        # index = self.tableView.currentIndex()
+        # newIndex = self.tableView.model().index(index.row(), 1)
+        # print("newIndex", newIndex)
+        # print("index", self.tableView.model().data(newIndex))
 
     def clickInquiryButton(self): 
         print("pressed InquiryButton")

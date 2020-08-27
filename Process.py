@@ -6,7 +6,7 @@ from PyQt5.QtWidgets import QApplication, QWidget, QMessageBox, QProgressDialog
 from view.PrograssDialog import Ui_Form
 
 from login.AutoLogin import AutoLogin
-
+from parsing.ProdCrawler import Crawler
 import threading
 
 import time
@@ -21,6 +21,7 @@ if __name__ == "__main__" :
     ## 로그인
     
     print("login start")
+    
     pgDialog = Ui_Form()
     pgDialog.setupUi()
     pgDialog.progLabel.setText("로그인 중..")
@@ -28,9 +29,12 @@ if __name__ == "__main__" :
     # pgDialog.start()
     #### 로그인
     loginProcess = AutoLogin()
+    ecountDataCrawler = Crawler()
 
     resultLogin = loginProcess.run()
-    if resultLogin[0] :
+
+    if resultLogin[0]:
+        
         pgDialog.close()
         myWindow.lozenLoginSession = loginProcess.login_session
         myWindow.lozenLoginData1 = resultLogin[1]
@@ -39,6 +43,8 @@ if __name__ == "__main__" :
         myWindow.SESSION_ID = resultLogin[4]
         
         print("### resultLogin : ", resultLogin)
+        
+        print("login end")
     else :
         pgDialog.close()
         msg = QMessageBox()
@@ -47,9 +53,27 @@ if __name__ == "__main__" :
         msg.setText("로그인에 실패하여 프로그램을 사용할 수 없습니다.\n config/config.properties 파일의 로그인 정보를 확인해주세요.")
         msg.setDefaultButton(QMessageBox.Escape)
         sys.exit(msg.exec_())
+    
+    pgDialog.progLabel.setText("품목 / 거래처 데이터 크롤링 중...")
+    
+    pgDialog.show()
+    resultCrawlingData = ecountDataCrawler.run()
+
+    if not resultCrawlingData :
+        msg = QMessageBox()
+        msg.setWindowTitle("Error")
+        msg.setIcon(QMessageBox.Critical)
+        msg.setText("이카운트 거래처, 품목데이터를 가져오는데 실패하였습니다. \n 프로그램은 재실행해도 같은 문제 발생 시,\n"+
+                    "ghdry2563@gmail.com 으로 문의주세요.")
+        msg.setDefaultButton(QMessageBox.Escape)
+            
+        sys.exit(msg.exec_())
 
     
-    print("login end")
+    pgDialog.close()
+    
+
+    
     #데이터 뿌리기
     # myWindow.reflash()
 

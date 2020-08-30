@@ -2,7 +2,8 @@ import sys
 
 from AutoRegister import WindowClass
 
-from PyQt5.QtWidgets import QApplication, QWidget, QMessageBox, QProgressDialog
+from PyQt5.QtWidgets import QApplication, QWidget, QMessageBox, QProgressDialog, QPushButton
+from PyQt5.QtCore import Qt
 from view.PrograssDialog import Ui_Form
 
 from login.AutoLogin import AutoLogin
@@ -55,20 +56,26 @@ if __name__ == "__main__" :
         sys.exit(msg.exec_())
     
     pgDialog.progLabel.setText("품목 / 거래처 데이터 크롤링 중...")
-    
-    pgDialog.show()
-    resultCrawlingData = ecountDataCrawler.run()
 
-    if not resultCrawlingData :
+    pgDialog.show()
+
+    while(not ecountDataCrawler.run2()):
+        #msg.setDefaultButton(QMessageBox.Escape)
         msg = QMessageBox()
         msg.setWindowTitle("Error")
         msg.setIcon(QMessageBox.Critical)
-        msg.setText("이카운트 거래처, 품목데이터를 가져오는데 실패하였습니다. \n 프로그램은 재실행해도 같은 문제 발생 시,\n"+
-                    "ghdry2563@gmail.com 으로 문의주세요.")
-        msg.setDefaultButton(QMessageBox.Escape)
-            
-        sys.exit(msg.exec_())
+        msg.setText("이카운트 거래처, 품목데이터를 가져오는데 실패하였습니다. \n 재시도해도 같은 문제 발생 시,\n"+
+                "ghdry2563@gmail.com 으로 문의주세요.")
+        msg.addButton('재시도', QMessageBox.YesRole)
+        msg.addButton('취소', QMessageBox.RejectRole)
+        flags = Qt.WindowFlags(Qt.WindowStaysOnTopHint)
+        msg.setWindowFlags(flags)
 
+        result = msg.exec_()
+        if result == 0:
+            continue
+        elif result == 1:
+            sys.exit()
     
     pgDialog.close()
     

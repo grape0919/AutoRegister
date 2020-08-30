@@ -53,18 +53,19 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         self.horizontalLayout.setStretch(2, 4)
         self.horizontalLayout.setStretch(3, 1)
         self.verticalLayout.addLayout(self.horizontalLayout)
-        self.tableView = QtWidgets.QTableView(self.layoutWidget)
-        self.tableView.setMinimumSize(QtCore.QSize(940, 400))
+        self.tableView = QtWidgets.QTableWidget(self.layoutWidget)
         self.tableView.setMaximumSize(QtCore.QSize(940, 400))
-
-        self.tableView.setSelectionBehavior(QtWidgets.QAbstractItemView.SelectRows)	# row 전체를 선택하도록
-
-        self.tableView.setSelectionMode(QtWidgets.QAbstractItemView.SingleSelection)	# 
-
-        self.tableView.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)		# 셀 내용을 수정 불가하도록
         
-        
+        # self.tableView = QtWidgets.QTableView(self.layoutWidget)
+        # self.tableView.setMinimumSize(QtCore.QSize(940, 400))
+        # self.tableView.setMaximumSize(QtCore.QSize(940, 400))
 
+        # self.tableView.setSelectionBehavior(QtWidgets.QAbstractItemView.SelectRows)	# row 전체를 선택하도록
+
+        # self.tableView.setSelectionMode(QtWidgets.QAbstractItemView.SingleSelection)	# 
+
+        # self.tableView.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)		# 셀 내용을 수정 불가하도록
+        
         self.verticalLayout.addWidget(self.tableView)
         self.registButton = QtWidgets.QPushButton(self.layoutWidget)
         self.registButton.setEnabled(True)

@@ -30,6 +30,9 @@ class Data:
 
         return json.dumps(data.__dict__)
 
+    def __str__(self):
+        return "CarriageData : EMPTY"
+
 
 class Register:
     headers = {'Content-Type': 'application/json; charset=utf-8'}
@@ -57,24 +60,24 @@ class Register:
 
     def inquiryProduct(self, prodNm):
         return 0
+if __name__ == "__main__" :
+    ZONE = "CC"
+    SESSION_ID = "36363532357c50415243454c:CC-AN16HBmxKKJ49"
+    reg = Register(ZONE, SESSION_ID)
 
-ZONE = "CC"
-SESSION_ID = "36363532357c50415243454c:CC-AN16HBmxKKJ49"
-reg = Register(ZONE, SESSION_ID)
+    data = Data()
+    data.UPLOAD_SER_NO = "0"
+    data.WH_CD = '00002'
+    data.carriageNumber = "0"
+    data.IO_DATE = '20200816'
+    data.CUST_DES = '테스트고객정보'
+    data.phoneNumber = '000-0000-0000'
+    data.address = '주소'
+    data.item = '품목'
+    data.QTY = '5'
 
-data = Data()
-data.UPLOAD_SER_NO = "0"
-data.WH_CD = '00002'
-data.carriageNumber = "0"
-data.IO_DATE = '20200816'
-data.CUST_DES = '테스트고객정보'
-data.phoneNumber = '000-0000-0000'
-data.address = '주소'
-data.item = '품목'
-data.QTY = '5'
+    # print(data.__dict__)
 
-# print(data.__dict__)
-
-print(data.toJson())
-reg.registration(data)
-# reg.registration(data)
+    print(data.toJson())
+    reg.registration(data)
+    # reg.registration(data)

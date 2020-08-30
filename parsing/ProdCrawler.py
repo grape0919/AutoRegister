@@ -6,6 +6,8 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from pathlib import Path
 
+from config.Configuration import Config
+
 import pandas as pd
 
 import time
@@ -21,10 +23,14 @@ class Crawler:
   customData = None
   prodData = None
 
+  def __init__(self):
+      self.config = Config()
+
   def run(self):
     try:
       print("downloadPath : " , self.downloadPath)
       options = webdriver.ChromeOptions()
+
 
       options.add_argument("headless")
       options.add_argument("disable-gpu")
@@ -46,22 +52,23 @@ class Crawler:
 
       #로그인
 
-      driver.find_element_by_xpath("/html/body/div[6]/form/div[1]/div/div[2]/div[1]/div[1]/input").send_keys("66525")
+      driver.find_element_by_xpath("/html/body/div[6]/form/div[1]/div/div[2]/div[1]/div[1]/input").send_keys(self.config.ecountComCode)
 
-      driver.find_element_by_xpath("/html/body/div[6]/form/div[1]/div/div[2]/div[1]/div[2]/input").send_keys("PARCEL")
+      driver.find_element_by_xpath("/html/body/div[6]/form/div[1]/div/div[2]/div[1]/div[2]/input").send_keys(self.config.ecountId)
 
-      driver.find_element_by_xpath("/html/body/div[6]/form/div[1]/div/div[2]/div[1]/div[3]/input[1]").send_keys("skdlszh9")
+      driver.find_element_by_xpath("/html/body/div[6]/form/div[1]/div/div[2]/div[1]/div[3]/input[1]").send_keys(self.config.ecountPwd)
 
       driver.find_element_by_id("save").click()
 
       driver.implicitly_wait(1)
-
+      try:
       #로그인정보 등록안함 클릭
-      driver.find_element_by_xpath("/html/body/div[7]/div[2]/div/div[3]/div/button[2]").click()
-
+        driver.find_element_by_xpath("/html/body/div[7]/div[2]/div/div[3]/div/button[2]").click()
+      except:
+        print("로그인 정보 등록 되어있음")
+        
       driver.implicitly_wait(5)
 
-      driver.implicitly_wait(1)
       #재고1 -> 기초등록 -> 품목등록
 
       print("재고1 클릭")
@@ -149,3 +156,7 @@ class Crawler:
     except:
       print("품목, 거래처 목록을 다운로드 중 문제가 발생하였습니다.")
       return False
+
+
+  def run2(self):
+    return True

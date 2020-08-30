@@ -1,8 +1,9 @@
 import sys
-from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.QtWidgets import *
+from PyQt5.QtWidgets import QCheckBox, QTableWidgetItem
+from PyQt5.QtGui import QStandardItemModel, QStandardItem
+from PyQt5.QtCore import Qt
 from view.main import Ui_MainWindow
-import static.staticValues as staticValues
+import static.staticValues as staticValue
 from data.CarriageData import Data, Register
 from parsing.LozenParser import Parser
 from view.PrograssDialog import Ui_Form
@@ -13,7 +14,9 @@ class WindowClass(Ui_MainWindow) :
 
     lozenLoginData1 = ""
     lozenLoginData2 = ""
-    
+    ZONE = ""
+    SESSION_ID = ""
+
     is_progressing = False
 
     def __init__(self) :
@@ -38,8 +41,8 @@ class WindowClass(Ui_MainWindow) :
     def reflash(self):
         print("reflash")
         #TODO: start progress
-        pg = Thread(target=self.progressing)
-        pg.start()
+        # pg = Thread(target=self.progressing)
+        # pg.start()
         #크롤링
         crawler = Parser(self.lozenLoginData1, self.lozenLoginData2, self.lozenLoginSession)
         
@@ -53,12 +56,12 @@ class WindowClass(Ui_MainWindow) :
         self.spreadData(dataList)
 
         #TODO: STOP PROGRESS
-        self.is_progressing = False
+        # self.is_progressing = False
 
     def spreadData(self, datas):
         print("spreadData")
     
-        self.model = QtGui.QStandardItemModel()
+        self.model = QStandardItemModel()
         self.model.setColumnCount(5)
         self.model.setHorizontalHeaderLabels(["","주문번호","운송장번호", "날짜", "상호", "전화번호", "상품", "수량", "주소"])
         
@@ -71,15 +74,21 @@ class WindowClass(Ui_MainWindow) :
 
             # 등록된 데이터 체크해서 Enabled 시키키
             items = []
-            item = QtGui.QStandardItem()
-            item.setCheckable(True)
-
-            enable = True
+            # item = QStandardItem()
+            # item.setCheckable(True)
+            # enable = True
             
-            item.setCheckState(not enable)
-            item.setEnabled(enable)
+            # item.setCheckState(not enable)
+            # item.setEnabled(enable)
 
-            items.append(item)
+            item = self.MyQTableWidgetItemCheckBox()
+            self.tableView.setItem(index, 0, item)
+            chbox = self.MyCheckBox(item)
+            # print(chbox.sizeHint())
+            self.tableView.setCellWidget(index, 0, chbox)
+            
+
+            # items.append(item)
 
             #품목 개수에 따라 행 높이 조절
             for i,d in enumerate(data.toArray()):
@@ -87,13 +96,17 @@ class WindowClass(Ui_MainWindow) :
                 if i == 5 and ('\n' in d):
                     # print("datas : ", d.count('\n'))
                     rowSet.append((index, d.count('\n')))
-                item = QtGui.QStandardItem(d)
-                item.setEnabled(enable)
-                items.append(item)
+                # item = QS(tandardItem(d)
+                print("d:",d)
+                item = QTableWidgetItem(d)
+                print("item:",item)
+                self.tableView.setItem(index, i, item)
+                # item.setEnabled(enable)
+                # items.append(item)
                 
-            self.model.appendRow(items)
+            # self.model.appendRow(items)
 
-        self.tableView.setModel(self.model) 
+        # self.tableView.setModel(self.model) 
         
         print("rowSet: " , rowSet)
         for row in rowSet:
@@ -123,10 +136,65 @@ class WindowClass(Ui_MainWindow) :
 
     def clickRegistrationButton(self): 
         print("pressed RegistryButton")
-        register = Register(ZONE, SESSION_ID)
+        register = Register(self.ZONE, self.SESSION_ID)
+        model = self.tableView.model()
+        print("model : ", model)
+        data = []
+        if model :
+            if model.rowCount() > 0:
+                for row in range(model.rowCount()):
+                    checkBox = self.findChild(QCheckBox, "DataListCheckBox_1")
+                    print("check box : " + checkBox.isChecked())
 
+                for row in range(model.rowCount()):
+                    data.append([])
+                    for column in range(model.columnCount()):
+                        index = model.index(row, column)
+                        # We suppose data are strings
+                        print("index : ", index)
+                        print("index data : ", model.data(index))
+                        data[row].append(str(model.data(index)))
+
+        print("Datas : ", data)
+
+
+    class MyCheckBox(QCheckBox): 
+        def __init__(self, item): 
+            """ :param item: QTableWidgetItem instance """ 
+            super().__init__() 
+            self.item = item 
+            self.mycheckvalue = 0 
+            # 0 --> unchecked, 2 --> checked 
+            self.stateChanged.connect(self.__checkbox_change) 
+            self.stateChanged.connect(self.item.my_setdata) 
+            # checked 여부로 정렬을 하기위한 data 저장 
+
+        def __checkbox_change(self, checkvalue): 
+            # print("myclass...check change... ", checkvalue) 
+            self.mycheckvalue = checkvalue 
+            print("checkbox row= ", self.get_row()) 
+
+        def get_row(self): 
+            return self.item.row()
+
+    class MyQTableWidgetItemCheckBox(QTableWidgetItem):
+        """
+        checkbox widget 과 같은 cell 에 item 으로 들어감. 
+        checkbox 값 변화에 따라, 사용자정의 data를 기준으로 정렬 기능 구현함.
+        """ 
+        def __init__(self): 
+            super().__init__() 
+            self.setData(Qt.UserRole, 0)
         
-        
+        def __lt__(self, other): 
+            # print(type(self.data(Qt.UserRole))) 
+            return self.data(Qt.UserRole) < other.data(Qt.UserRole) 
+
+        def my_setdata(self, value): 
+            # print("my setdata ", value) 
+            self.setData(Qt.UserRole, value)
+            #print("row ", self.row())
+
 
 
 if __name__ == "__main__" :

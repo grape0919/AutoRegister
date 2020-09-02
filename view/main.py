@@ -18,6 +18,11 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         MainWindow.resize(960, 550)
         MainWindow.setMinimumSize(QtCore.QSize(960, 550))
         MainWindow.setMaximumSize(QtCore.QSize(960, 550))
+
+        #메인 화면 색상py
+        self.setStyleSheet("color: black;"
+                        "background-color: white")
+
         self.centralwidget = QtWidgets.QWidget(MainWindow)
         self.centralwidget.setMinimumSize(QtCore.QSize(960, 550))
         self.centralwidget.setMaximumSize(QtCore.QSize(960, 550))
@@ -56,6 +61,11 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         self.tableView = QtWidgets.QTableWidget(self.layoutWidget)
         self.tableView.setMaximumSize(QtCore.QSize(940, 400))
         
+        self.tableView.setColumnCount(9)
+        self.tableView.setHorizontalHeaderLabels(["","주문번호","운송장번호", "날짜", "상호", "전화번호", "상품", "수량", "주소"])
+        self.tableView.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
+        self.tableView.setSelectionMode(QtWidgets.QAbstractItemView.SingleSelection)
+        self.tableView.setSelectionBehavior(QtWidgets.QAbstractItemView.SelectRows)
         # self.tableView = QtWidgets.QTableView(self.layoutWidget)
         # self.tableView.setMinimumSize(QtCore.QSize(940, 400))
         # self.tableView.setMaximumSize(QtCore.QSize(940, 400))

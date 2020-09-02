@@ -68,9 +68,9 @@ class Parser:
 
             data.carriageNumber = main_id
             data.IO_DATE = date_str
-            data.sanghoName = sangho_name
+            data.CUST_DES = sangho_name
             data.phoneNumber = phone
-            data.item = prod_datas.strip()
+            data.PROD_DES = prod_datas.strip()
             data.QTY = prod_eas.strip()
             data.address = address
 

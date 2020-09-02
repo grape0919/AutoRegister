@@ -121,23 +121,22 @@ class Crawler:
         df = pd.read_excel(customDataFilePath,
                   sheet_name='거래처등록',
                   header=1,
-                  index_col='거래처코드',
-                  dtype={'거래처명':str})
+                  index_col='거래처명',
+                  dtype={'거래처코드':str})
         
-        print("df.A : ", df['거래처명'])
+        print("df.A : ", df['거래처코드'])
 
-        self.customData = df['거래처명']
-        
+        self.customData = df['거래처코드']
 
         df = pd.read_excel(prodDataFilePath,
                   sheet_name='품목리스트',
                   header=1,
-                  index_col='품목코드',
-                  dtype={'품목명':str})
+                  index_col='품목명',
+                  dtype={'품목코드':str})
         
-        print("df.A : ", df['품목명'])
+        print("df.A : ", df['품목코드'])
 
-        self.prodData = df['품목명']
+        self.prodData = df['품목코드']
 
 
         customDataFilePath.unlink()

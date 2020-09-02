@@ -59,7 +59,7 @@ if __name__ == "__main__" :
 
     pgDialog.show()
 
-    while(not ecountDataCrawler.run2()):
+    while(not ecountDataCrawler.run()):
         #msg.setDefaultButton(QMessageBox.Escape)
         msg = QMessageBox()
         msg.setWindowTitle("Error")
@@ -79,7 +79,8 @@ if __name__ == "__main__" :
     
     pgDialog.close()
     
-
+    myWindow.prodCodeData = ecountDataCrawler.prodData
+    myWindow.customCodeData = ecountDataCrawler.customData
     
     #데이터 뿌리기
     # myWindow.reflash()

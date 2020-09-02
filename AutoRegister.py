@@ -1,7 +1,9 @@
 import sys
 from PyQt5.QtWidgets import QCheckBox, QTableWidgetItem
 from PyQt5.QtGui import QStandardItemModel, QStandardItem
-from PyQt5.QtCore import Qt
+from PyQt5.QtCore import Qt, QPoint
+
+from requests.models import codes
 from view.main import Ui_MainWindow
 import static.staticValues as staticValue
 from data.CarriageData import Data, Register
@@ -19,6 +21,9 @@ class WindowClass(Ui_MainWindow) :
 
     is_progressing = False
 
+    prodCodeData = None
+    customCodeData = None
+
     def __init__(self) :
         super(WindowClass, self).__init__()
         self.setupUi(self)
@@ -34,7 +39,7 @@ class WindowClass(Ui_MainWindow) :
         pgDialog = Ui_Form()
         pgDialog.setupUi()
         pgDialog.progLabel.setText("데이터 크롤링 중..")
-        process = False
+        # process = False
         
         print("stopProgressing")
 
@@ -51,9 +56,9 @@ class WindowClass(Ui_MainWindow) :
 
         ddate = str(self.toDateEdit.date().toPyDate())
         toDate = "".join(ddate.split("-"))
-        dataList = crawler.parse(fromDate, toDate)
+        self.dataList = crawler.parse(fromDate, toDate)
 
-        self.spreadData(dataList)
+        self.spreadData(self.dataList)
 
         #TODO: STOP PROGRESS
         # self.is_progressing = False
@@ -61,56 +66,69 @@ class WindowClass(Ui_MainWindow) :
     def spreadData(self, datas):
         print("spreadData")
     
-        self.model = QStandardItemModel()
-        self.model.setColumnCount(5)
-        self.model.setHorizontalHeaderLabels(["","주문번호","운송장번호", "날짜", "상호", "전화번호", "상품", "수량", "주소"])
+        # self.model = QStandardItemModel()
+        # self.model.setColumnCount(5)
+        # self.model.setHorizontalHeaderLabels(["","주문번호","운송장번호", "날짜", "상호", "전화번호", "상품", "수량", "주소"])
         
+        self.tableView.setColumnCount(9)
+        self.tableView.setRowCount(len(datas))
         self.tableView.clicked.connect(self.clickTable)
     
         #크롤링 된 데이터를 tableView에 뿌릴 model 생성
         
         rowSet = []
+        
+        tempDate = ""
+        upload_count = 0
+
         for index, data in enumerate(datas):
 
             # 등록된 데이터 체크해서 Enabled 시키키
-            items = []
-            # item = QStandardItem()
-            # item.setCheckable(True)
-            # enable = True
-            
-            # item.setCheckState(not enable)
-            # item.setEnabled(enable)
-
             item = self.MyQTableWidgetItemCheckBox()
             self.tableView.setItem(index, 0, item)
             chbox = self.MyCheckBox(item)
-            # print(chbox.sizeHint())
             self.tableView.setCellWidget(index, 0, chbox)
             
 
-            # items.append(item)
-
-            #품목 개수에 따라 행 높이 조절
             for i,d in enumerate(data.toArray()):
-                # print("data : ", d)
                 if i == 5 and ('\n' in d):
-                    # print("datas : ", d.count('\n'))
                     rowSet.append((index, d.count('\n')))
-                # item = QS(tandardItem(d)
-                print("d:",d)
-                item = QTableWidgetItem(d)
-                print("item:",item)
-                self.tableView.setItem(index, i, item)
-                # item.setEnabled(enable)
-                # items.append(item)
-                
-            # self.model.appendRow(items)
+                if(i == 0):
+                    if tempDate != data.IO_DATE:
+                        tempDate = data.IO_DATE
+                        upload_count=1
+                    else :
+                        upload_count+=1
 
-        # self.tableView.setModel(self.model) 
+                    data.UPLOAD_SER_NO = tempDate+"_"+str(upload_count)
+                    d = data.UPLOAD_SER_NO
+                elif(i == 3):
+                    try:
+                        code = self.customCodeData[d]
+                    except KeyError:
+                        code = "TRA2008008" #택배
+                    
+                    data.CUST = code
+                elif(i == 5):
+                    data.PROD_DES = data.PROD_DES.split('\n')
+                    code = []
+                    for prodNm in data.PROD_DES:
+                        try:
+                            code.append(self.prodCodeData[prodNm])
+                        except KeyError:
+                            code.append("ECO14_05_04")
+                    
+                    data.PROD_CD = code
+                    data.QTY = data.QTY.split('\n')
+
+                item = QTableWidgetItem(d)
+                self.tableView.setItem(index, i+1, item)
         
         print("rowSet: " , rowSet)
+        
+        #품목 개수에 따라 행 높이 조절
         for row in rowSet:
-            self.tableView.setRowHeight(row[0], 40+(row[1]*40))
+            self.tableView.setRowHeight(row[0], 40+(row[1]*20))
 
         self.tableView.setColumnWidth(0, 10)
         self.tableView.setColumnWidth(1, 80)
@@ -125,10 +143,6 @@ class WindowClass(Ui_MainWindow) :
 
     def clickTable(self):
         print("click table view")
-        # index = self.tableView.currentIndex()
-        # newIndex = self.tableView.model().index(index.row(), 1)
-        # print("newIndex", newIndex)
-        # print("index", self.tableView.model().data(newIndex))
 
     def clickInquiryButton(self): 
         print("pressed InquiryButton")
@@ -137,25 +151,18 @@ class WindowClass(Ui_MainWindow) :
     def clickRegistrationButton(self): 
         print("pressed RegistryButton")
         register = Register(self.ZONE, self.SESSION_ID)
-        model = self.tableView.model()
-        print("model : ", model)
+        # model = self.tableView.model()
+        # print("model : ", model)
         data = []
-        if model :
-            if model.rowCount() > 0:
-                for row in range(model.rowCount()):
-                    checkBox = self.findChild(QCheckBox, "DataListCheckBox_1")
-                    print("check box : " + checkBox.isChecked())
-
-                for row in range(model.rowCount()):
-                    data.append([])
-                    for column in range(model.columnCount()):
-                        index = model.index(row, column)
-                        # We suppose data are strings
-                        print("index : ", index)
-                        print("index data : ", model.data(index))
-                        data[row].append(str(model.data(index)))
-
-        print("Datas : ", data)
+        if self.tableView.rowCount() > 0:
+            for row in range(self.tableView.rowCount()):
+                if(self.tableView.item(row, 0).text() == "0"):
+                    continue
+                else :
+                    self.dataList[row].checkValue = "2"
+                    data.append(self.dataList[row])
+        
+        register.registrationList(data)
 
 
     class MyCheckBox(QCheckBox): 
@@ -172,8 +179,12 @@ class WindowClass(Ui_MainWindow) :
         def __checkbox_change(self, checkvalue): 
             # print("myclass...check change... ", checkvalue) 
             self.mycheckvalue = checkvalue 
-            print("checkbox row= ", self.get_row()) 
+            print("checkbox row= ", self.get_row())
+            print("checkValue : ", self.mycheckvalue)
+            print("self ", self.objectName)
 
+            # item = QTableWidgetItem("True")
+            # self.item.setItem(self.get_row(), "True")
         def get_row(self): 
             return self.item.row()
 
@@ -191,11 +202,13 @@ class WindowClass(Ui_MainWindow) :
             return self.data(Qt.UserRole) < other.data(Qt.UserRole) 
 
         def my_setdata(self, value): 
-            # print("my setdata ", value) 
+            print("my setdata ", value) 
             self.setData(Qt.UserRole, value)
-            #print("row ", self.row())
+            print("row ", self.row())
+            print("self.data : ", self.data(Qt.UserRole))
 
-
+        def text(self):
+            return str(self.data(Qt.UserRole))
 
 if __name__ == "__main__" :
     #QApplication : 프로그램을 실행시켜주는 클래스

@@ -59,7 +59,7 @@ class Register:
     def registration(self, data):
         print("CarriageData Registraion")
 
-        post = """{{
+        post = """{
                     "SaleList": ["""
         for i in range(len(data.PROD_CD)):
             post +=     """
@@ -83,10 +83,12 @@ class Register:
                      PROD_CD=data.PROD_CD[i], PROD_DES=data.PROD_DES[i], QTY=data.QTY[i], PHONE=data.phoneNumber
                      , ADDRESS=data.address, ECT="")
             if(i != len(data.PROD_CD)-1):
-                post += ",\n"
+                post += """,
+                        """
 
         post += """]
-                }}""".encode("utf-8")
+                }"""
+        post = post.encode("utf-8")
         print("post: " , post)
         response = requests.post(self.registrationUrl, data=post, headers=self.headers)
         print("response : " ,response.text)

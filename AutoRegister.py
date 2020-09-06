@@ -1,17 +1,13 @@
+
 import sys
 from PyQt5.QtWidgets import QCheckBox, QTableWidgetItem
-from PyQt5.QtGui import QStandardItemModel, QStandardItem
-from PyQt5.QtCore import Qt, QPoint
+from PyQt5.QtCore import Qt
 
-from requests.models import codes
 from view.main import Ui_MainWindow
-import static.staticValues as staticValue
-from data.CarriageData import Data, Register
+from data.CarriageData import Register
 from parsing.LozenParser import Parser
 from view.PrograssDialog import Ui_Form
-from threading import Thread
-import re
-
+from log.Logger import Logger
 class WindowClass(Ui_MainWindow) :
 
     lozenLoginData1 = ""
@@ -23,6 +19,8 @@ class WindowClass(Ui_MainWindow) :
 
     prodCodeData = None
     customCodeData = None
+    prodSearchData = None
+    prodSearchDict = None
 
     def __init__(self) :
         super(WindowClass, self).__init__()
@@ -33,7 +31,7 @@ class WindowClass(Ui_MainWindow) :
         self.registButton.clicked.connect(self.clickRegistrationButton)
 
     def progressing(self):
-        print("startProgressing")
+        Logger.info("startProgressing")
         self.is_progressing = True
         
         pgDialog = Ui_Form()
@@ -41,10 +39,10 @@ class WindowClass(Ui_MainWindow) :
         pgDialog.progLabel.setText("데이터 크롤링 중..")
         # process = False
         
-        print("stopProgressing")
+        Logger.info("stopProgressing")
 
     def reflash(self):
-        print("reflash")
+        Logger.info("reflash")
         #TODO: start progress
         # pg = Thread(target=self.progressing)
         # pg.start()
@@ -64,7 +62,7 @@ class WindowClass(Ui_MainWindow) :
         # self.is_progressing = False
 
     def spreadData(self, datas):
-        print("spreadData")
+        Logger.info("spreadData")
     
         # self.model = QStandardItemModel()
         # self.model.setColumnCount(5)
@@ -91,32 +89,35 @@ class WindowClass(Ui_MainWindow) :
             
 
             for i,d in enumerate(data.toArray()):
-                if i == 5 and ('\n' in d):
-                    rowSet.append((index, d.count('\n')))
-                if(i == 0):
-                    if tempDate != data.IO_DATE:
-                        tempDate = data.IO_DATE
-                        upload_count=1
-                    else :
-                        upload_count+=1
+                # if(i == 0):
+                #     if tempDate != data.IO_DATE:
+                #         tempDate = data.IO_DATE
+                #         upload_count=1
+                #     else :
+                #         upload_count+=1
 
-                    data.UPLOAD_SER_NO = tempDate+"_"+str(upload_count)
-                    d = data.UPLOAD_SER_NO
-                elif(i == 3):
+                #     data.UPLOAD_SER_NO = tempDate+"_"+str(upload_count)
+                #     d = data.UPLOAD_SER_NO
+                if(i == 2):
                     try:
                         code = self.customCodeData[d]
                     except KeyError:
                         code = "TRA2008008" #택배
                     
                     data.CUST = code
-                elif(i == 5):
+                elif(i == 4):
+                    rowSet.append((index, d.count('\n')))
                     data.PROD_DES = data.PROD_DES.split('\n')
                     code = []
-                    for prodNm in data.PROD_DES:
+                    for idx, prodNm in enumerate(data.PROD_DES):
                         try:
                             code.append(self.prodCodeData[prodNm])
                         except KeyError:
-                            code.append("ECO14_05_04")
+                            try:
+                                code.append(self.prodSearchData[prodNm])
+                                data.PROD_DES[idx] = self.prodSearchDict[prodNm]
+                            except:
+                                code.append("ECO14_05_04")
                     
                     data.PROD_CD = code
                     data.QTY = data.QTY.split('\n')
@@ -124,32 +125,19 @@ class WindowClass(Ui_MainWindow) :
                 item = QTableWidgetItem(d)
                 self.tableView.setItem(index, i+1, item)
         
-        print("rowSet: " , rowSet)
-        
         #품목 개수에 따라 행 높이 조절
         for row in rowSet:
             self.tableView.setRowHeight(row[0], 40+(row[1]*20))
 
-        self.tableView.setColumnWidth(0, 10)
-        self.tableView.setColumnWidth(1, 80)
-        self.tableView.setColumnWidth(2, 80)
-        self.tableView.setColumnWidth(3, 80)
-
-        self.tableView.setColumnWidth(4, 150)
-        self.tableView.setColumnWidth(5, 120)
-
-        self.tableView.setColumnWidth(7, 40)
-        self.tableView.setColumnWidth(8, 250)
-
     def clickTable(self):
-        print("click table view")
+        Logger.info("click table view")
 
     def clickInquiryButton(self): 
-        print("pressed InquiryButton")
+        Logger.info("pressed InquiryButton")
         self.reflash()
 
     def clickRegistrationButton(self): 
-        print("pressed RegistryButton")
+        Logger.info("pressed RegistryButton")
         register = Register(self.ZONE, self.SESSION_ID)
         # model = self.tableView.model()
         # print("model : ", model)
@@ -179,9 +167,9 @@ class WindowClass(Ui_MainWindow) :
         def __checkbox_change(self, checkvalue): 
             # print("myclass...check change... ", checkvalue) 
             self.mycheckvalue = checkvalue 
-            print("checkbox row= ", self.get_row())
-            print("checkValue : ", self.mycheckvalue)
-            print("self ", self.objectName)
+            Logger.debug("checkbox row= " + str(self.get_row()))
+            Logger.debug("checkValue : " + str(self.mycheckvalue))
+            Logger.debug("self " + str(self.objectName))
 
             # item = QTableWidgetItem("True")
             # self.item.setItem(self.get_row(), "True")
@@ -202,10 +190,10 @@ class WindowClass(Ui_MainWindow) :
             return self.data(Qt.UserRole) < other.data(Qt.UserRole) 
 
         def my_setdata(self, value): 
-            print("my setdata ", value) 
+            Logger.debug("my setdata " + str(value)) 
             self.setData(Qt.UserRole, value)
-            print("row ", self.row())
-            print("self.data : ", self.data(Qt.UserRole))
+            Logger.debug("row " + str(self.row()))
+            Logger.debug("self.data : " + str(self.data(Qt.UserRole)))
 
         def text(self):
             return str(self.data(Qt.UserRole))

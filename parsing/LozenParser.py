@@ -2,6 +2,7 @@ import requests
 
 import re
 from data.CarriageData import Data
+from log.Logger import Logger
 
 class Parser:
 
@@ -19,7 +20,7 @@ class Parser:
             post = {'branchCd':self.loginData1,'tradeCd':self.loginData2,'fromDate':fromDate,'toDate':toDate ,'personNm':'','ziphaGb':'A','delieverGb':'A','unsongjangGb':'F'}
 
         except:
-            print("로젠 로그인 설정이 잘못 되었습니다. ID : ", self.loginData1, " PASSWORD : ", self.loginData2)
+            Logger.error("로젠 로그인 설정이 잘못 되었습니다. ID : ", self.loginData1, " PASSWORD : ", self.loginData2)
             return None
         response = self.session.post(url,data=post,headers=headers_common)
         main_list = response.text.split('≡')
@@ -37,14 +38,12 @@ class Parser:
             post = {'waybillNo':main_data_temp.split('Ξ')[3].replace('-',''),'UserID':self.loginData2}
             response = self.session.post(url,data=post,headers=headers_common)
             main_data=response.text
-            cnt = 1
+
             date_str = main_data.split('Ξ')[12].replace('-','')
             sangho_name = main_data.split('Ξ')[0]
             phone = main_data.split('Ξ')[3]
-            address = main_data.split('Ξ')[2]+' '+main_data.split('Ξ')[1]
+            address = main_data.split('Ξ')[2]#+' '+main_data.split('Ξ')[1]
             
-            prod_str = ''
-            prod_cnt = 1
             
             splited_prods = re.split('[\,\.]',main_data.split('Ξ')[28])
             prod_datas = ""

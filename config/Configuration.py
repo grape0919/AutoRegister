@@ -1,5 +1,6 @@
 import configparser
 import os
+from log.Logger import Logger
 
 class Config:
     configFilePath = os.getcwd() + "\\config\\config.properties"
@@ -33,9 +34,9 @@ class Config:
                 self.lozenId = config[self.lozenHeader][self.lozenIdKey]
                 self.lozenPwd = config[self.lozenHeader][self.lozenPwdKey]
             else:
-                print("LOZEN 로그인 정보 불러오기 실패 : ", self.configFilePath, " 설정을 불러오는데 실패했습니다.")
+                Logger.error("LOZEN 로그인 정보 불러오기 실패 : " + self.configFilePath + " 설정을 불러오는데 실패했습니다.")
 
-            print("ecount login")
+            Logger.info("ecount login")
             config.read(self.ecountId)
             if (self.ecountHeader in config):
                 self.ecountId = config[self.ecountHeader][self.ecountIdKey]
@@ -43,10 +44,10 @@ class Config:
                 self.ecountComCode = config[self.ecountHeader][self.ecountComKey]
                 self.ecountApiKey = config[self.ecountHeader][self.ecountApiKeyKey]
 
-                print("apikey: " , self.ecountApiKey)
+                Logger.debug("apikey: "  + self.ecountApiKey)
 
             else:
-                print("ECOUNT 로그인 정보 불러오기 실패 : ", self.configFilePath, " 설정을 불러오는데 실패했습니다.")
+                Logger.error("ECOUNT 로그인 정보 불러오기 실패 : " + self.configFilePath + " 설정을 불러오는데 실패했습니다.")
         except :
-            print("로그인 정보 불러오기 실패 : ", self.configFilePath, " 설정을 불러오는데 실패했습니다.")
+            Logger.error("로그인 정보 불러오기 실패 : " + self.configFilePath + " 설정을 불러오는데 실패했습니다.")
             

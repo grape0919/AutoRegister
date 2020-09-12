@@ -103,6 +103,7 @@ class WindowClass(Ui_MainWindow) :
                         code = self.customCodeData[d]
                     except KeyError:
                         code = "TRA2008008" #택배
+                        
                     
                     data.CUST = code
                 elif(i == 4):

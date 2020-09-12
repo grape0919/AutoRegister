@@ -1,16 +1,14 @@
 import sys
+from log.Logger import Logger
 
 from AutoRegister import WindowClass
 
-from PyQt5.QtWidgets import QApplication, QWidget, QMessageBox, QProgressDialog, QPushButton
+from PyQt5.QtWidgets import QApplication, QMessageBox
 from PyQt5.QtCore import Qt
 from view.PrograssDialog import Ui_Form
 
 from login.AutoLogin import AutoLogin
 from parsing.ProdCrawler import Crawler
-import threading
-
-import time
 
 
 if __name__ == "__main__" :
@@ -21,11 +19,11 @@ if __name__ == "__main__" :
 
     ## 로그인
     
-    print("login start")
+    Logger.info("login start")
     
     pgDialog = Ui_Form()
     pgDialog.setupUi()
-    pgDialog.progLabel.setText("로그인 중..")
+    pgDialog.progLabel.setText("로그인 및 거래처/품목데이터 로딩중..")
     pgDialog.show()
     # pgDialog.start()
     #### 로그인
@@ -36,16 +34,15 @@ if __name__ == "__main__" :
 
     if resultLogin[0]:
         
-        pgDialog.close()
         myWindow.lozenLoginSession = loginProcess.login_session
         myWindow.lozenLoginData1 = resultLogin[1]
         myWindow.lozenLoginData2 = resultLogin[2]
         myWindow.ZONE = resultLogin[3]
         myWindow.SESSION_ID = resultLogin[4]
         
-        print("### resultLogin : ", resultLogin)
+        Logger.debug("### resultLogin : " + str(resultLogin))
         
-        print("login end")
+        Logger.info("login end")
     else :
         pgDialog.close()
         msg = QMessageBox()
@@ -54,10 +51,6 @@ if __name__ == "__main__" :
         msg.setText("로그인에 실패하여 프로그램을 사용할 수 없습니다.\n config/config.properties 파일의 로그인 정보를 확인해주세요.")
         msg.setDefaultButton(QMessageBox.Escape)
         sys.exit(msg.exec_())
-    
-    pgDialog.progLabel.setText("품목 / 거래처 데이터 크롤링 중...")
-
-    pgDialog.show()
 
     while(not ecountDataCrawler.run()):
         #msg.setDefaultButton(QMessageBox.Escape)
@@ -79,6 +72,8 @@ if __name__ == "__main__" :
     
     pgDialog.close()
     
+    myWindow.prodSearchData = ecountDataCrawler.searchData
+    myWindow.prodSearchDict = ecountDataCrawler.searchDict
     myWindow.prodCodeData = ecountDataCrawler.prodData
     myWindow.customCodeData = ecountDataCrawler.customData
     

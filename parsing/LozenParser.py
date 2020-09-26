@@ -48,6 +48,7 @@ class Parser:
             splited_prods = re.split('[\,\.]',main_data.split('Ξ')[28])
             prod_datas = ""
             prod_eas = ""
+            print("@!#!@# splited_prods : ", splited_prods)
             for prod in splited_prods:
                 pd = prod.strip().split(' ')
                 prod_datas += str(pd[0]) + "\n"
@@ -75,4 +76,5 @@ class Parser:
 
             dataList.append(data)
 
+            print("!@#!@# data : ", data)
         return dataList

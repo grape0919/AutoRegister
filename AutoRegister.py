@@ -68,7 +68,7 @@ class WindowClass(Ui_MainWindow) :
         # self.model.setColumnCount(5)
         # self.model.setHorizontalHeaderLabels(["","주문번호","운송장번호", "날짜", "상호", "전화번호", "상품", "수량", "주소"])
         
-        self.tableView.setColumnCount(9)
+        self.tableView.setColumnCount(8)
         self.tableView.setRowCount(len(datas))
         self.tableView.clicked.connect(self.clickTable)
     
@@ -114,12 +114,15 @@ class WindowClass(Ui_MainWindow) :
                         try:
                             code.append(self.prodCodeData[prodNm])
                         except KeyError:
+                            print("!@#!@# 품목 데이터 없음 : ", prodNm)
                             try:
                                 code.append(self.prodSearchData[prodNm])
                                 data.PROD_DES[idx] = self.prodSearchDict[prodNm]
                             except:
+                                print("!@#!@# 품목 검색 데이터 없음 : ", prodNm)
                                 code.append("ECO14_05_04")
                     
+                    print("!@#!@# 품목코드 : ", code)
                     data.PROD_CD = code
                     data.QTY = data.QTY.split('\n')
 
@@ -143,11 +146,15 @@ class WindowClass(Ui_MainWindow) :
         # model = self.tableView.model()
         # print("model : ", model)
         data = []
+        print("!@#!@# rowCount : " , self.tableView.rowCount())
         if self.tableView.rowCount() > 0:
             for row in range(self.tableView.rowCount()):
+                print("!@#!@# check . ", row, ":", self.tableView.item(row, 0).text())
                 if(self.tableView.item(row, 0).text() == "0"):
+                    print("!@#!@# continue")
                     continue
                 else :
+                    print("!@#!@# self.dataList[row] : ", self.dataList[row])
                     self.dataList[row].checkValue = "2"
                     data.append(self.dataList[row])
         

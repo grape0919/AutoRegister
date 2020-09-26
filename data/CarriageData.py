@@ -20,11 +20,11 @@ class Data:
     QTY = '수량' #필수
 
     def toArray(self):
-        array = [self.carriageNumber, self.IO_DATE, self.CUST_DES, self.phoneNumber, self.PROD_DES, self.QTY, self.address, self.PROD_CD]
+        array = [self.carriageNumber, self.IO_DATE, self.CUST_DES, self.phoneNumber, self.PROD_DES, self.QTY, self.address]
         return array
 
     def __str__(self):
-        return "CarriageData : EMPTY"
+        return "CarriageData : " + str(self.toArray)
     
     def __repr__(self):
         return (str(self.toArray()))
@@ -47,6 +47,8 @@ class Register:
     def registration(self, data):
         Logger.info("CarriageData Registraion")
 
+        print("!@#!@# data : ", data)
+
         post = """{
                     "SaleList": ["""
         for i in range(len(data.PROD_CD)):
@@ -67,7 +69,7 @@ class Register:
                             "U_MEMO5": "{ECT}",
                             }}
                         }}
-                        """.format(IO_DATE=data.IO_DATE, CUST=data.CUST, CUST_DES2=data.CUST_DES if data.CUST != "TRA2008008" else "택배발송",# UPLOAD_SER_NO=data.UPLOAD_SER_NO
+                        """.format(IO_DATE=data.IO_DATE, CUST=data.CUST, CUST_DES2=data.CUST_DES if str(data.CUST) != "TRA2008008" else "택배발송",# UPLOAD_SER_NO=data.UPLOAD_SER_NO
                      CUST_DES1 = data.CUST_DES, PROD_CD=data.PROD_CD[i], PROD_DES=data.PROD_DES[i], QTY=data.QTY[i], PHONE=data.phoneNumber
                      , ADDRESS=data.address, ECT="")
             if(i != len(data.PROD_CD)-1):
@@ -76,6 +78,7 @@ class Register:
 
         post += """]
                 }"""
+    
         post = post.encode("utf-8")
         Logger.debug("post: "  + str(post))
         response = requests.post(self.registrationUrl, data=post, headers=self.headers)
@@ -85,10 +88,14 @@ class Register:
         fail_cnt = ""
         error_msg = ""
 
+
         if(status == "200"):
             success_cnt = response.json()["Data"]["SuccessCnt"]
             fail_cnt = response.json()["Data"]["FailCnt"]
-            return (True, success_cnt, fail_cnt)
+            if(fail_cnt == 0):
+                return (True)
+            else:
+                return (False, response.json()["Data"]["ResultDetails"][0]["TotalError"])
         else:
             error_msg = response.json()["Error"]["Message"]
             return (False, error_msg)
@@ -101,7 +108,8 @@ class Register:
         for d in dataList:
             a = self.registration(d)
             if not a[0]:
-                check_resp.append(a[1])
+                check_resp.append(str(a[1])+"data : "+str(d.CUST_DES)+" : " +str(d.PROD_DES))
+
 
         msg = QMessageBox()
         if len(check_resp) > 0:

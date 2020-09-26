@@ -139,6 +139,7 @@ class Crawler:
 
       self.prodData = df['품목코드']
 
+      print("!@#!@# prodData : ", self.prodData)
       tempSearchKey = df['검색창내용']
       tempV = []
       tempI = []

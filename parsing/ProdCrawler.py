@@ -130,7 +130,7 @@ class Crawler:
       self.customData = df['거래처코드']
 
       df = pd.read_excel(prodDataFilePath,
-                sheet_name='품목리스트',
+                sheet_name='품목등록',
                 header=1,
                 index_col='품목명',
                 dtype={'품목코드':str})

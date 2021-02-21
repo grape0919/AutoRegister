@@ -93,7 +93,7 @@ class Register:
             success_cnt = response.json()["Data"]["SuccessCnt"]
             fail_cnt = response.json()["Data"]["FailCnt"]
             if(fail_cnt == 0):
-                return (True)
+                return (True, success_cnt)
             else:
                 return (False, response.json()["Data"]["ResultDetails"][0]["TotalError"])
         else:
